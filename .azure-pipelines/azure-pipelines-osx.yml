@@ -6,14 +6,14 @@ jobs:
   strategy:
     maxParallel: 8
     matrix:
-      osx_c_compilerclangcxx_compilerclangxx:
-        CONFIG: osx_c_compilerclangcxx_compilerclangxx
+      osx_c_compilerclang:
+        CONFIG: osx_c_compilerclang
 
   steps:
   # TODO: Fast finish on azure pipelines?
   - script: |
       echo "Fast Finish"
-
+      
 
   - script: |
       echo "Removing homebrew from Azure to avoid conflicts."
@@ -70,3 +70,5 @@ jobs:
       set -x -e
       conda build ./recipe -m ./.ci_support/${CONFIG}.yaml --clobber-file ./.ci_support/clobber_${CONFIG}.yaml
     displayName: Build recipe
+
+  

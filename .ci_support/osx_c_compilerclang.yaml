@@ -2,6 +2,8 @@ MACOSX_DEPLOYMENT_TARGET:
 - '10.9'
 build_number_decrement:
 - '0'
+c_compiler:
+- clang
 channel_sources:
 - conda-forge/label/gcc7,defaults
 channel_targets:
@@ -17,7 +19,6 @@ r_base:
 - 3.5.1
 zip_keys:
 - - c_compiler
-  - cxx_compiler
   - channel_sources
   - channel_targets
   - build_number_decrement
