@@ -13,16 +13,17 @@ source:
 
 build:
   merge_build_host: True  # [win]
-  number: 1000
-  skip: True  # [osx]
+  number: 1001
+  skip: True  # [osx and c_compiler == "toolchain_c" or win and vc<14]
   rpaths:
     - lib/R/lib/
     - lib/
 
 requirements:
   build:
-    - {{ compiler('c') }}        # [not win]
-    - {{ compiler('cxx') }}      # [not win]
+    - {{ compiler('c') }}        # [linux]
+    - {{ compiler('cxx') }}      # [linux]
+    - llvm-openmp                # [osx]
     - {{native}}toolchain        # [win]
     - {{posix}}filesystem        # [win]
     - {{posix}}make
