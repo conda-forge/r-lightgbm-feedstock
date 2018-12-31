@@ -13,7 +13,7 @@ source:
 
 build:
   merge_build_host: True  # [win]
-  number: 1001
+  number: 1002
   skip: True  # [osx and c_compiler == "toolchain_c" or win and vc<14]
   rpaths:
     - lib/R/lib/
@@ -23,7 +23,6 @@ requirements:
   build:
     - {{ compiler('c') }}        # [linux]
     - {{ compiler('cxx') }}      # [linux]
-    - llvm-openmp                # [osx]
     - {{native}}toolchain        # [win]
     - {{posix}}filesystem        # [win]
     - {{posix}}make
@@ -41,6 +40,8 @@ requirements:
   run:
     - r-base
     - {{native}}gcc-libs         # [win]
+    - libcxx                     # [osx]
+    - llvm-openmp                # [osx]
     - r-data.table >=1.9.6
     - r-jsonlite >=1.0
     - r-magrittr >=1.5
