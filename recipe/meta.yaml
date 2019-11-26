@@ -30,6 +30,7 @@ requirements:
     - {{posix}}coreutils         # [win]
     - {{posix}}zip               # [win]
     - cmake >=3.8
+    - llvm-openmp    # [osx]
   host:
     - r-base
     - r-data.table >=1.9.6
@@ -37,6 +38,7 @@ requirements:
     - r-magrittr >=1.5
     - r-matrix >=1.1_0
     - r-r6 >=2.0
+    - llvm-openmp    # [osx]
   run:
     - r-base
     - {{native}}gcc-libs         # [win]
@@ -45,6 +47,7 @@ requirements:
     - r-magrittr >=1.5
     - r-matrix >=1.1_0
     - r-r6 >=2.0
+    - llvm-openmp    # [osx]
 
 test:
   files:
