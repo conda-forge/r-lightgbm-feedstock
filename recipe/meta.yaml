@@ -1,4 +1,4 @@
-{% set version = "2.2.3" %}
+{% set version = "2.3.1" %}
 {% set posix = 'm2-' if win else '' %}
 {% set native = 'm2w64-' if win else '' %}
 
@@ -9,11 +9,11 @@ package:
 source:
   fn: {{ version }}.tar.gz
   url: https://github.com/Microsoft/LightGBM/archive/v{{ version }}.tar.gz
-  sha256: 4a6414e808b343a784f0ee805ac723c094488f9e9a951dd3f709dc31ffb4ea4c
+  sha256: b2b8ed5e06be21444c4e9defd66877510d1800a650543f75bfc1b28f77745b84
 
 build:
-  merge_build_host: True  # [win]
-  number: 2
+  merge_build_host: true  # [win]
+  number: 0
   rpaths:
     - lib/R/lib/
     - lib/
