@@ -1,0 +1,347 @@
+From 8944b5e6b9a4e47b02bbd6c5237061e408eb6b34 Mon Sep 17 00:00:00 2001
+From: Nikita Titov <nekit94-08@mail.ru>
+Date: Sun, 12 Jan 2020 16:51:27 +0300
+Subject: [PATCH] removed OpenMP ugly fix for Mojave (#2674)
+
+* removed OpenMP ugly fix for Mojave as it's fixed in latest CMake
+
+* test: switch compilers
+
+* switch compilers back
+---
+ .ci/test.sh                  | 22 +++++------------
+ CMakeLists.txt               |  2 +-
+ R-package/README.md          |  2 +-
+ R-package/src/install.libs.R | 20 ----------------
+ docs/Installation-Guide.rst  | 45 +++--------------------------------
+ python-package/README.rst    | 10 +-------
+ python-package/setup.py      | 46 ++++--------------------------------
+ 7 files changed, 16 insertions(+), 131 deletions(-)
+
+diff --git a/.ci/test.sh b/.ci/test.sh
+index 420cf0924..07e658e2b 100755
+--- a/.ci/test.sh
++++ b/.ci/test.sh
+@@ -8,16 +8,6 @@ elif [[ $OS_NAME == "linux" ]] && [[ $COMPILER == "clang" ]]; then
+     export CC=clang
+ fi
+ 
+-if [[ $OS_NAME == "macos" ]] && [[ $COMPILER == "clang" ]] && [[ $(sw_vers -productVersion | cut -d'.' -f2) -ge "14" ]]; then
+-    CMAKE_OPTS=(-DOpenMP_C_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include"
+-                -DOpenMP_C_LIB_NAMES=omp
+-                -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include"
+-                -DOpenMP_CXX_LIB_NAMES=omp
+-                -DOpenMP_omp_LIBRARY=$(brew --prefix libomp)/lib/libomp.dylib)
+-else
+-    CMAKE_OPTS=()
+-fi
+-
+ conda create -q -y -n $CONDA_ENV python=$PYTHON_VERSION
+ source activate $CONDA_ENV
+ 
+@@ -71,7 +61,7 @@ fi
+ 
+ if [[ $TASK == "if-else" ]]; then
+     conda install -q -y -n $CONDA_ENV numpy
+-    mkdir $BUILD_DIRECTORY/build && cd $BUILD_DIRECTORY/build && cmake "${CMAKE_OPTS[@]}" .. && make lightgbm -j4 || exit -1
++    mkdir $BUILD_DIRECTORY/build && cd $BUILD_DIRECTORY/build && cmake .. && make lightgbm -j4 || exit -1
+     cd $BUILD_DIRECTORY/tests/cpp_test && ../../lightgbm config=train.conf convert_model_language=cpp convert_model=../../src/boosting/gbdt_prediction.cpp && ../../lightgbm config=predict.conf output_result=origin.pred || exit -1
+     cd $BUILD_DIRECTORY/build && make lightgbm -j4 || exit -1
+     cd $BUILD_DIRECTORY/tests/cpp_test && ../../lightgbm config=predict.conf output_result=ifelse.pred && python test.py || exit -1
+@@ -97,9 +87,9 @@ if [[ $TASK == "sdist" ]]; then
+         cp $BUILD_DIRECTORY/python-package/dist/lightgbm-$LGB_VER.tar.gz $BUILD_ARTIFACTSTAGINGDIRECTORY
+         mkdir $BUILD_DIRECTORY/build && cd $BUILD_DIRECTORY/build
+         if [[ $OS_NAME == "macos" ]]; then
+-            cmake -DUSE_SWIG=ON -DAPPLE_OUTPUT_DYLIB=ON "${CMAKE_OPTS[@]}" ..
++            cmake -DUSE_SWIG=ON -DAPPLE_OUTPUT_DYLIB=ON ..
+         else
+-            cmake -DUSE_SWIG=ON "${CMAKE_OPTS[@]}" ..
++            cmake -DUSE_SWIG=ON ..
+         fi
+         make -j4 || exit -1
+         if [[ $OS_NAME == "linux" ]] && [[ $COMPILER == "gcc" ]]; then
+@@ -140,7 +130,7 @@ if [[ $TASK == "gpu" ]]; then
+         pytest $BUILD_DIRECTORY/tests/python_package_test || exit -1
+         exit 0
+     fi
+-    cmake -DUSE_GPU=ON -DOpenCL_INCLUDE_DIR=$AMDAPPSDK_PATH/include/ "${CMAKE_OPTS[@]}" ..
++    cmake -DUSE_GPU=ON -DOpenCL_INCLUDE_DIR=$AMDAPPSDK_PATH/include/ ..
+ elif [[ $TASK == "mpi" ]]; then
+     if [[ $METHOD == "pip" ]]; then
+         cd $BUILD_DIRECTORY/python-package && python setup.py sdist || exit -1
+@@ -148,9 +138,9 @@ elif [[ $TASK == "mpi" ]]; then
+         pytest $BUILD_DIRECTORY/tests/python_package_test || exit -1
+         exit 0
+     fi
+-    cmake -DUSE_MPI=ON "${CMAKE_OPTS[@]}" ..
++    cmake -DUSE_MPI=ON ..
+ else
+-    cmake "${CMAKE_OPTS[@]}" ..
++    cmake ..
+ fi
+ 
+ make _lightgbm -j4 || exit -1
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 878256463..2d6a247dd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -29,7 +29,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.1.0")
+     message(FATAL_ERROR "Insufficient AppleClang version")
+   endif()
+-  cmake_minimum_required(VERSION 3.12)
++  cmake_minimum_required(VERSION 3.16)
+ elseif(MSVC)
+   if(MSVC_VERSION LESS 1900)
+     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} doesn't support required C++11 features. Please use a newer MSVC.")
+diff --git a/R-package/README.md b/R-package/README.md
+index 91c773f25..728d97377 100644
+--- a/R-package/README.md
++++ b/R-package/README.md
+@@ -24,7 +24,7 @@ For users who wants to install online with GPU or want to choose a specific comp
+ 
+ #### Mac OS Preparation
+ 
+-You can perform installation either with **Apple Clang** or **gcc**. In case you prefer **Apple Clang**, you should install **OpenMP** (details for installation can be found in [Installation Guide](https://github.com/microsoft/LightGBM/blob/master/docs/Installation-Guide.rst#apple-clang)) first and **CMake** version 3.12 or higher is required. In case you prefer **gcc**, you need to install it (details for installation can be found in [Installation Guide](https://github.com/microsoft/LightGBM/blob/master/docs/Installation-Guide.rst#gcc)) and set some environment variables to tell R to use `gcc` and `g++`. If you install these from Homebrew, your versions of `g++` and `gcc` are most likely in `/usr/local/bin`, as shown below.
++You can perform installation either with **Apple Clang** or **gcc**. In case you prefer **Apple Clang**, you should install **OpenMP** (details for installation can be found in [Installation Guide](https://github.com/microsoft/LightGBM/blob/master/docs/Installation-Guide.rst#apple-clang)) first and **CMake** version 3.16 or higher is required. In case you prefer **gcc**, you need to install it (details for installation can be found in [Installation Guide](https://github.com/microsoft/LightGBM/blob/master/docs/Installation-Guide.rst#gcc)) and set some environment variables to tell R to use `gcc` and `g++`. If you install these from Homebrew, your versions of `g++` and `gcc` are most likely in `/usr/local/bin`, as shown below.
+ 
+ ```
+ # replace 8 with version of gcc installed on your machine
+diff --git a/R-package/src/install.libs.R b/R-package/src/install.libs.R
+index b7aa4cb88..ea11372f2 100644
+--- a/R-package/src/install.libs.R
++++ b/R-package/src/install.libs.R
+@@ -44,26 +44,6 @@ if (!use_precompile) {
+     cmake_cmd <- paste0(cmake_cmd, " -DUSE_R35=ON ")
+   }
+ 
+-  # Could NOT find OpenMP_C on Mojave workaround
+-  # Using this kind-of complicated pattern to avoid matching to
+-  # things like "pgcc"
+-  using_gcc <- grepl(
+-    pattern = "^gcc$|[/\\]+gcc$|^gcc\\-[0-9]+$|[/\\]+gcc\\-[0-9]+$"
+-    , x = Sys.getenv("CC", "")
+-  )
+-  using_gpp <- grepl(
+-    pattern = "^g\\+\\+$|[/\\]+g\\+\\+$|^g\\+\\+\\-[0-9]+$|[/\\]+g\\+\\+\\-[0-9]+$"
+-    , x = Sys.getenv("CXX", "")
+-  )
+-  on_mac <- Sys.info()["sysname"] == "Darwin"
+-  if (on_mac && !(using_gcc & using_gpp)) {
+-    cmake_cmd <- paste(cmake_cmd, ' -DOpenMP_C_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" ')
+-    cmake_cmd <- paste(cmake_cmd, ' -DOpenMP_C_LIB_NAMES="omp" ')
+-    cmake_cmd <- paste(cmake_cmd, ' -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" ')
+-    cmake_cmd <- paste(cmake_cmd, ' -DOpenMP_CXX_LIB_NAMES="omp" ')
+-    cmake_cmd <- paste(cmake_cmd, ' -DOpenMP_omp_LIBRARY="$(brew --prefix libomp)/lib/libomp.dylib" ')
+-  }
+-
+   # Check if Windows installation (for gcc vs Visual Studio)
+   if (WINDOWS) {
+     if (use_mingw) {
+diff --git a/docs/Installation-Guide.rst b/docs/Installation-Guide.rst
+index 5239bdb6a..261625727 100644
+--- a/docs/Installation-Guide.rst
++++ b/docs/Installation-Guide.rst
+@@ -128,7 +128,7 @@ Install Using ``Homebrew``
+ Build from GitHub
+ *****************
+ 
+-1. Install `CMake`_ (3.12 or higher):
++1. Install `CMake`_ (3.16 or higher):
+ 
+    .. code::
+ 
+@@ -146,19 +146,7 @@ Build from GitHub
+ 
+      git clone --recursive https://github.com/microsoft/LightGBM ; cd LightGBM
+      mkdir build ; cd build
+-
+-     # For Mojave or newer (>=10.14)
+-     cmake \
+-       -DOpenMP_C_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" \
+-       -DOpenMP_C_LIB_NAMES="omp" \
+-       -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" \
+-       -DOpenMP_CXX_LIB_NAMES="omp" \
+-       -DOpenMP_omp_LIBRARY=$(brew --prefix libomp)/lib/libomp.dylib \
+-       ..
+-
+-     # For High Sierra or earlier (<= 10.13)
+      cmake ..
+-
+      make -j4
+ 
+ gcc
+@@ -424,7 +412,7 @@ Apple Clang
+ 
+ Only **Apple Clang** version 8.1 or higher is supported.
+ 
+-1. Install `CMake`_ (3.12 or higher):
++1. Install `CMake`_ (3.16 or higher):
+ 
+    .. code::
+ 
+@@ -448,20 +436,7 @@ Only **Apple Clang** version 8.1 or higher is supported.
+ 
+      git clone --recursive https://github.com/microsoft/LightGBM ; cd LightGBM
+      mkdir build ; cd build
+-
+-     # For Mojave or newer (>=10.14)
+-     cmake \
+-       -DUSE_MPI=ON \
+-       -DOpenMP_C_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" \
+-       -DOpenMP_C_LIB_NAMES="omp" \
+-       -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" \
+-       -DOpenMP_CXX_LIB_NAMES="omp" \
+-       -DOpenMP_omp_LIBRARY=$(brew --prefix libomp)/lib/libomp.dylib \
+-       ..
+-
+-     # For High Sierra or earlier (<= 10.13)
+      cmake -DUSE_MPI=ON ..
+-
+      make -j4
+ 
+ gcc
+@@ -693,7 +668,7 @@ Apple Clang
+ 
+ Only **Apple Clang** version 8.1 or higher is supported.
+ 
+-1. Install `CMake`_ (3.12 or higher):
++1. Install `CMake`_ (3.16 or higher):
+ 
+    .. code::
+ 
+@@ -711,21 +686,7 @@ Only **Apple Clang** version 8.1 or higher is supported.
+ 
+      git clone --recursive https://github.com/microsoft/LightGBM ; cd LightGBM
+      mkdir build ; cd build
+-
+-     # For Mojave or newer (>=10.14)
+-     cmake \
+-       -DUSE_SWIG=ON \
+-       -DAPPLE_OUTPUT_DYLIB=ON \
+-       -DOpenMP_C_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" \
+-       -DOpenMP_C_LIB_NAMES="omp" \
+-       -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" \
+-       -DOpenMP_CXX_LIB_NAMES="omp" \
+-       -DOpenMP_omp_LIBRARY=$(brew --prefix libomp)/lib/libomp.dylib \
+-       ..
+-
+-     # For High Sierra or earlier (<= 10.13)
+      cmake -DUSE_SWIG=ON -DAPPLE_OUTPUT_DYLIB=ON ..
+-
+      make -j4
+ 
+ gcc
+diff --git a/python-package/README.rst b/python-package/README.rst
+index 47734b787..b765aa2af 100644
+--- a/python-package/README.rst
++++ b/python-package/README.rst
+@@ -45,13 +45,7 @@ For **Linux** and **macOS** users, installation from sources requires installed
+ 
+ For **macOS** users, you can perform installation either with **Apple Clang** or **gcc**.
+ 
+-- In case you prefer **Apple Clang**, you should install **OpenMP** (details for installation can be found in `Installation Guide <https://github.com/microsoft/LightGBM/blob/master/docs/Installation-Guide.rst#apple-clang>`__) first and **CMake** version 3.12 or higher is required.
+-
+-  In some cases **OpenMP** cannot be found which causes installation failures. So, if you encounter errors during the installation process, try to pass paths to **CMake** via ``pip`` options, like
+-
+-  .. code:: sh
+-
+-      pip install lightgbm --install-option="--openmp-include-dir=/usr/local/opt/libomp/include/" --install-option="--openmp-library=/usr/local/opt/libomp/lib/libomp.dylib"
++- In case you prefer **Apple Clang**, you should install **OpenMP** (details for installation can be found in `Installation Guide <https://github.com/microsoft/LightGBM/blob/master/docs/Installation-Guide.rst#apple-clang>`__) first and **CMake** version 3.16 or higher is required.
+ 
+ - In case you prefer **gcc**, you need to install it (details for installation can be found in `Installation Guide <https://github.com/microsoft/LightGBM/blob/master/docs/Installation-Guide.rst#gcc>`__) and specify compilers by running ``export CXX=g++-7 CC=gcc-7`` (replace "7" with version of **gcc** installed on your machine) first.
+ 
+@@ -151,8 +145,6 @@ Install from GitHub
+ 
+ All remarks from `Build from Sources section <#build-from-sources>`__ are actual in this case.
+ 
+-For **macOS** users who compile with **Apple Clang**, to pass **OpenMP** paths to **CMake** use the following syntax: ``python setup.py install --openmp-include-dir=/usr/local/opt/libomp/include/ --openmp-library=/usr/local/opt/libomp/lib/libomp.dylib``.
+-
+ For **Windows** users, if you get any errors during installation and there is the warning ``WARNING:LightGBM:Compilation with MSBuild from existing solution file failed.`` in the log, you should install `CMake`_ (version 3.8 or higher).
+ 
+ .. code:: sh
+diff --git a/python-package/setup.py b/python-package/setup.py
+index e6dd63808..f04eaa405 100644
+--- a/python-package/setup.py
++++ b/python-package/setup.py
+@@ -90,7 +90,6 @@ def compile_cpp(use_mingw=False, use_gpu=False, use_mpi=False,
+                 use_hdfs=False, boost_root=None, boost_dir=None,
+                 boost_include_dir=None, boost_librarydir=None,
+                 opencl_include_dir=None, opencl_library=None,
+-                openmp_include_dir=None, openmp_library=None,
+                 nomp=False, bit32=False):
+ 
+     if os.path.exists(os.path.join(CURRENT_DIR, "build_cpp")):
+@@ -166,41 +165,9 @@ def compile_cpp(use_mingw=False, use_gpu=False, use_mpi=False,
+                             error_msg='Please install CMake first')
+     else:  # Linux, Darwin (macOS), etc.
+         logger.info("Starting to compile with CMake.")
+-        # Apple Clang with OpenMP
+-        if system() == 'Darwin' and not nomp and not (os.environ.get('CC', '').split('/')[-1].split('\\')[-1].startswith('gcc')
+-                                                      and os.environ.get('CXX', '').split('/')[-1].split('\\')[-1].startswith('g++')):
+-            def get_cmake_opts(openmp_include_dir, openmp_library):
+-                if openmp_include_dir and openmp_library:
+-                    return ['-DOpenMP_C_FLAGS=-Xpreprocessor -fopenmp -I{0}'.format(openmp_include_dir),
+-                            '-DOpenMP_C_LIB_NAMES=omp',
+-                            '-DOpenMP_CXX_FLAGS=-Xpreprocessor -fopenmp -I{0}'.format(openmp_include_dir),
+-                            '-DOpenMP_CXX_LIB_NAMES=omp',
+-                            '-DOpenMP_omp_LIBRARY={0}'.format(openmp_library)]
+-                else:
+-                    return []
+-
+-            status = silent_call(cmake_cmd + get_cmake_opts(openmp_include_dir, openmp_library))
+-            status += silent_call(["make", "_lightgbm", "-j4"])
+-            if status != 0:
+-                logger.warning("Compilation failed.")
+-                logger.info("Starting to compile with Homebrew OpenMP paths guesses.")
+-                clear_path(os.path.join(CURRENT_DIR, "build_cpp"))
+-                status = silent_call(cmake_cmd + get_cmake_opts('/usr/local/opt/libomp/include',
+-                                                                '/usr/local/opt/libomp/lib/libomp.dylib'))
+-                status += silent_call(["make", "_lightgbm", "-j4"])
+-            if status != 0:
+-                logger.warning("Compilation failed.")
+-                logger.info("Starting to compile with MacPorts OpenMP paths guesses.")
+-                clear_path(os.path.join(CURRENT_DIR, "build_cpp"))
+-                silent_call(cmake_cmd + get_cmake_opts('/opt/local/include/libomp',
+-                                                       '/opt/local/lib/libomp/libomp.dylib'),
+-                            raise_error=True, error_msg='Please install CMake and all required dependencies first')
+-                silent_call(["make", "_lightgbm", "-j4"], raise_error=True,
+-                            error_msg='An error has occurred while building lightgbm library file')
+-        else:
+-            silent_call(cmake_cmd, raise_error=True, error_msg='Please install CMake and all required dependencies first')
+-            silent_call(["make", "_lightgbm", "-j4"], raise_error=True,
+-                        error_msg='An error has occurred while building lightgbm library file')
++        silent_call(cmake_cmd, raise_error=True, error_msg='Please install CMake and all required dependencies first')
++        silent_call(["make", "_lightgbm", "-j4"], raise_error=True,
++                    error_msg='An error has occurred while building lightgbm library file')
+     os.chdir(CURRENT_DIR)
+ 
+ 
+@@ -230,9 +197,7 @@ class CustomInstall(install):
+         ('boost-include-dir=', None, 'Directory containing Boost headers'),
+         ('boost-librarydir=', None, 'Preferred Boost library directory'),
+         ('opencl-include-dir=', None, 'OpenCL include directory'),
+-        ('opencl-library=', None, 'Path to OpenCL library'),
+-        ('openmp-include-dir=', None, 'OpenMP include directory'),
+-        ('openmp-library=', None, 'Path to OpenMP library')
++        ('opencl-library=', None, 'Path to OpenCL library')
+     ]
+ 
+     def initialize_options(self):
+@@ -245,8 +210,6 @@ def initialize_options(self):
+         self.boost_librarydir = None
+         self.opencl_include_dir = None
+         self.opencl_library = None
+-        self.openmp_include_dir = None
+-        self.openmp_library = None
+         self.mpi = 0
+         self.hdfs = 0
+         self.precompile = 0
+@@ -268,7 +231,6 @@ def run(self):
+                         use_hdfs=self.hdfs, boost_root=self.boost_root, boost_dir=self.boost_dir,
+                         boost_include_dir=self.boost_include_dir, boost_librarydir=self.boost_librarydir,
+                         opencl_include_dir=self.opencl_include_dir, opencl_library=self.opencl_library,
+-                        openmp_include_dir=self.openmp_include_dir, openmp_library=self.openmp_library,
+                         nomp=self.nomp, bit32=self.bit32)
+         install.run(self)
+         if os.path.isfile(LOG_PATH):
