@@ -5,13 +5,11 @@ Home: https://github.com/Microsoft/LightGBM
 
 Package license: MIT
 
-Feedstock license: BSD-3-Clause
+Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/r-lightgbm-feedstock/blob/master/LICENSE.txt)
 
 Summary: A fast, distributed, high performance gradient boosting (GBDT, GBRT, GBM or MART)
 framework based on decision tree algorithms, used for ranking, classification and
 many other machine learning tasks.
-
-
 
 
 Current build status
