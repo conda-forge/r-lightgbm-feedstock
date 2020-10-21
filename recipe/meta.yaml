@@ -1,4 +1,4 @@
-{% set version = "3.0.0" %}
+{% set version = "3.0.0.2" %}
 {% set posix = 'm2-' if win else '' %}
 {% set native = 'm2w64-' if win else '' %}
 
@@ -7,8 +7,10 @@ package:
   version: {{ version|replace("-", "_") }}
 
 source:
-  url: https://github.com/Microsoft/LightGBM/archive/v{{ version }}.tar.gz
-  sha256: 940563ece81d94eb843c2d1dc702da5af7c2a67fb1ccf31d64b39e00262d35b5
+  url: 
+    - {{ cran_mirror }}/src/contrib/lightgbm_{{ version }}.tar.gz
+    - {{ cran_mirror }}/src/contrib/Archive/lightgbm/lightgbm_{{ version }}.tar.gz
+  sha256: 301ca49fff45a87caf7298839f1d2ffc2e3755795c7ba57268765f505d390c89
   #patches:
   #  - 8944b5e6b9a4e47b02bbd6c5237061e408eb6b34.patch
 
