@@ -9,8 +9,8 @@ package:
 source:
   url: https://github.com/Microsoft/LightGBM/archive/v{{ version }}.tar.gz
   sha256: 940563ece81d94eb843c2d1dc702da5af7c2a67fb1ccf31d64b39e00262d35b5
-  patches:
-    - 8944b5e6b9a4e47b02bbd6c5237061e408eb6b34.patch
+  #patches:
+  #  - 8944b5e6b9a4e47b02bbd6c5237061e408eb6b34.patch
 
 build:
   merge_build_host: true  # [win]
