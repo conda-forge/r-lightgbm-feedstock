@@ -1,4 +1,4 @@
-{% set version = "2.3.1" %}
+{% set version = "3.1.0" %}
 {% set posix = 'm2-' if win else '' %}
 {% set native = 'm2w64-' if win else '' %}
 
@@ -8,7 +8,7 @@ package:
 
 source:
   url: https://github.com/Microsoft/LightGBM/archive/v{{ version }}.tar.gz
-  sha256: b2b8ed5e06be21444c4e9defd66877510d1800a650543f75bfc1b28f77745b84
+  sha256: 5575c5abc4630b1ecb5990363bdaf25118efbd48416dda930f390689cfc58040
   patches:
     - 8944b5e6b9a4e47b02bbd6c5237061e408eb6b34.patch
 
