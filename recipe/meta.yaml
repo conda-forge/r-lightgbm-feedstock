@@ -22,6 +22,10 @@ build:
 requirements:
   build:
     - cross-r-base {{ r_base }}  # [build_platform != target_platform]
+    - r-matrix >=1.1_0           # [build_platform != target_platform]
+    - r-r6 >=2.0                 # [build_platform != target_platform]
+    - r-data.table >=1.9.6       # [build_platform != target_platform]
+    - r-jsonlite >=1.0           # [build_platform != target_platform]
     - {{ compiler('c') }}              # [not win]
     - {{ compiler('m2w64_c') }}        # [win]
     - {{ compiler('cxx') }}            # [not win]
