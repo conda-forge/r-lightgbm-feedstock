@@ -1,4 +1,4 @@
-{% set version = "3.2.0" %}
+{% set version = "3.2.1" %}
 {% set posix = 'm2-' if win else '' %}
 {% set native = 'm2w64-' if win else '' %}
 
@@ -10,7 +10,7 @@ source:
   url:
     - {{ cran_mirror }}/src/contrib/lightgbm_{{ version }}.tar.gz
     - {{ cran_mirror }}/src/contrib/Archive/lightgbm/lightgbm_{{ version }}.tar.gz
-  sha256: 72cffef6b707d0391a72f3fe6d36f50ca3872c24a42417956b0ddaf332fb812b
+  sha256: 6d5e333f88d0bf6a23caea59438a1a3d63505b1d6ca5b6cf9c49bf314f6c6684
 
 build:
   merge_build_host: true  # [win]
