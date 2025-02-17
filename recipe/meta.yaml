@@ -75,6 +75,7 @@ about:
 
 extra:
   recipe-maintainers:
+    - jameslamb
     - conda-forge/r
     - xhochy
 
