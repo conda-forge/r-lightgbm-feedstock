@@ -15,7 +15,7 @@ build:
   # Needs a new C++ Toolchain for R
   # Checking windows to see if it passes. Uncomment the line if it fails.
   # skip: true  # [win]
-  number: 0
+  number: 1
   rpaths:
     - lib/R/lib/
     - lib/
