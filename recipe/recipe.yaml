@@ -79,7 +79,7 @@ about:
     training time by using multiple machines."
   license_family: MIT
   license_file:
-    - ${{ env["PREFIX"] }}/lib/R/share/licenses/MIT
+    #- ${{ env["PREFIX"] }}/lib/R/share/licenses/MIT
     - LICENSE
 
 extra:
