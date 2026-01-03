@@ -1,0 +1,89 @@
+context:
+  version: "4.6.0"
+
+package:
+  name: r-lightgbm
+  version: '4.6.0'
+
+source:
+  url:
+    - ${{ cran_mirror }}/src/contrib/lightgbm_${{ version }}.tar.gz
+    - ${{ cran_mirror }}/src/contrib/Archive/lightgbm/lightgbm_${{ version }}.tar.gz
+  sha256: f98342af92df56876210945ec59dafa3b633082a2ef113c97caf115ac7cd4188
+
+build:
+  number: 2
+  # ref: https://rattler-build.prefix.dev/latest/build_options/#dynamic-linking-configuration
+  dynamic_linking:
+    rpaths:
+      - lib/R/lib/
+      - lib/
+
+requirements:
+  build:
+    - if: build_platform != target_platform
+      then:
+        - cross-r-base ${{ r_base }}
+        - r-data.table >=1.9.6
+        - r-jsonlite >=1.0
+        - r-matrix >=1.1_0
+        - r-r6 >=2.0
+    - if: win
+      then:
+        - ${{ compiler('m2w64_c') }}
+        - ${{ stdlib("m2w64_c") }}
+        - ${{ compiler('m2w64_cxx') }}
+        - m2-autoconf
+        - m2-automake-wrapper
+        - m2-coreutils
+        - m2-filesystem
+        - m2-grep
+        - m2-make
+        - m2-sed
+        - m2-zip
+      else:
+        - ${{ compiler('c') }}
+        - ${{ stdlib("c") }}
+        - ${{ compiler('cxx') }}
+        - autoconf
+        - automake
+        - make
+    - pkg-config
+  host:
+    - r-base
+    - r-matrix >=1.1_0
+    - r-r6 >=2.0
+    - r-data.table >=1.9.6
+    - r-jsonlite >=1.0
+  run:
+    - r-base
+    - r-matrix >=1.1_0
+    - r-r6 >=2.0
+    - r-data.table >=1.9.6
+    - r-jsonlite >=1.0
+
+tests:
+  - script:
+      - if: win
+        then:
+          - "\"%R%\" -e \"library('lightgbm')\""
+        else:
+          - $R -e "library('lightgbm')"
+
+about:
+  homepage: https://github.com/Microsoft/LightGBM
+  license: MIT
+  summary: "Tree based algorithms can be improved by introducing boosting frameworks. 'LightGBM' is one such framework, based on Ke, Guolin et al. (2017) <https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision>. This package offers an R interface to work with it. It is designed to be distributed
+    and efficient with the following advantages: 1. Faster training speed and higher efficiency. 2. Lower memory usage. 3. Better accuracy. 4. Parallel learning supported. 5. Capable of handling large-scale data. In recognition of these advantages, 'LightGBM' has been widely-used in many winning solutions of machine learning
+    competitions. Comparison experiments on public datasets suggest that 'LightGBM' can outperform existing boosting frameworks on both efficiency and accuracy, with significantly lower memory consumption. In addition, parallel experiments suggest that in certain circumstances, 'LightGBM' can achieve a linear speed-up in
+    training time by using multiple machines."
+  license_family: MIT
+  license_file:
+    - ${{ env["PREFIX"] }}/lib/R/share/licenses/MIT
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - jameslamb
+    - conda-forge/r
+    - xhochy
