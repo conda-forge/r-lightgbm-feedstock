@@ -1,9 +1,15 @@
+c_compiler:
+- vs2022
+c_stdlib:
+- vs
 channel_sources:
 - conda-forge
 channel_targets:
 - conda-forge main
 cran_mirror:
 - https://cran.r-project.org
+cxx_compiler:
+- vs2022
 m2w64_c_compiler:
 - gcc
 m2w64_c_compiler_version:
