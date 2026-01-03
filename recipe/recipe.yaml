@@ -23,7 +23,7 @@ requirements:
   build:
     - if: build_platform != target_platform
       then:
-        - cross-r-base ${{ r_base }}
+        - cross-r-base ${{ r_base }}.*
         - r-data.table >=1.9.6
         - r-jsonlite >=1.0
         - r-matrix >=1.1_0
