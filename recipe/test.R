@@ -23,12 +23,12 @@ params <- list(
 )
 
 # test training
-dtrain <- lgb.Dataset(
+dtrain <- lightgbm::lgb.Dataset(
     agaricus.train$data
     , label = agaricus.train$label
     , params = params
 )
-bst <- lgb.train(params, dtrain)
+bst <- lightgbm::lgb.train(params, dtrain)
 
 stopifnot(bst$current_iter() == num_iterations)
 stopifnot(bst$num_iter() == num_iterations)
