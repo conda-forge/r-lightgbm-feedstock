@@ -15,7 +15,7 @@ build:
   # Needs a new C++ Toolchain for R
   # Checking windows to see if it passes. Uncomment the line if it fails.
   # skip: true  # [win]
-  number: 1
+  number: 2
   rpaths:
     - lib/R/lib/
     - lib/
@@ -58,8 +58,7 @@ requirements:
 
 test:
   commands:
-    - $R -e "library('lightgbm')"           # [not win]
-    - "\"%R%\" -e \"library('lightgbm')\""  # [win]
+    - Rscript test.R
 
 about:
   home: https://github.com/Microsoft/LightGBM
