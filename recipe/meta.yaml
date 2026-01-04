@@ -57,6 +57,8 @@ requirements:
     - r-jsonlite >=1.0
 
 test:
+  files:
+    - test.R
   commands:
     - Rscript test.R
 
