@@ -1,4 +1,4 @@
-{% set version = "4.6.0" %}
+{% set version = "4.7.0" %}
 {% set posix = 'm2-' if win else '' %}
 
 package:
@@ -9,13 +9,13 @@ source:
   url:
     - {{ cran_mirror }}/src/contrib/lightgbm_{{ version }}.tar.gz
     - {{ cran_mirror }}/src/contrib/Archive/lightgbm/lightgbm_{{ version }}.tar.gz
-  sha256: f98342af92df56876210945ec59dafa3b633082a2ef113c97caf115ac7cd4188
+  sha256: 8fbd5ab227aef04d8cb25e6ab9632abda3d089eca4bcc31076f90c5f379e18c5
 
 build:
   # Needs a new C++ Toolchain for R
   # Checking windows to see if it passes. Uncomment the line if it fails.
   # skip: true  # [win]
-  number: 2
+  number: 0
   rpaths:
     - lib/R/lib/
     - lib/
